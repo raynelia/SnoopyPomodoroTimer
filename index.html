@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Snoopy Pomodoro Timer</title>
+  <meta name="description" content="Pomodoro timer estilizado com fundo rosa, serifado, pronto para GitHub Pages."/>
+  <style>
+    :root{
+      --accent: #DB7093;
+      --bg: #FFB6C1;
+      --text: #F08080;
+      --muted: #fcd5dc;
+      --card: #fff;
+      --shadow: 0 10px 30px rgba(219,112,147,0.15);
+      --radius: 18px;
+    }
+    *{ box-sizing: border-box; }
+    html,body{
+    height:100%;
+    margin:0;
+    font-family: Georgia, 'Times New Roman', serif;
+    background: url("fundo-site.jpg") no-repeat center center fixed;
+    background-size: cover;
+    color:var(--text);
+  }
+    .wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:28px; }
+    .card{
+    width:min(720px,96vw);
+    background: url("fundo-caixa.jpg") repeat;
+    border-radius:var(--radius);
+    padding:22px;
+    box-shadow:var(--shadow);
+    border:1px solid rgba(219,112,147,0.15);
+  }
+    .top{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    h1{ margin:0; font-size:20px; color:var(--accent); }
+    .modes{ display:flex; gap:8px; }
+    .mode{ background:transparent; border:1px solid var(--muted); color:var(--accent); padding:8px 12px; border-radius:999px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .mode.active{ background:var(--accent); color:white; border-color:var(--accent); box-shadow: 0 6px 20px rgba(219,112,147,0.25); transform:translateY(-2px); }
+    .ring{ --size:340px; width:var(--size); height:var(--size); border-radius:50%; margin:22px auto; display:grid; place-items:center;
+      background: radial-gradient(circle at 50% 40%, #fff 75%, transparent 76%),
+                  conic-gradient(var(--accent) var(--p,0%), rgba(255,182,193,0.9) 0); transition:background .2s linear; border:2px solid rgba(219,112,147,0.1); }
+    .time{ font-weight:800; font-size:72px; color:var(--text); letter-spacing:1px; text-align:center; }
+    .controls{ display:flex; justify-content:center; gap:10px; margin-top:12px; }
+    .btn{ border:0; padding:12px 16px; border-radius:12px; font-weight:800; cursor:pointer; background:var(--accent); color:white; box-shadow: 0 8px 18px rgba(219,112,147,0.25); font-family:inherit; }
+    .btn.secondary{ background:#fff; color:var(--accent); border:1px solid var(--muted); box-shadow:none; }
+    .settings{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:14px; flex-wrap:wrap; }
+    .inputs{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    label{ font-size:13px; color:var(--accent); font-weight:700; font-family:inherit; }
+    input[type=number]{ width:72px; padding:8px; border-radius:10px; border:1px solid var(--muted); background:white; font-weight:700; color:var(--accent); font-family:inherit; }
+    .small{ font-size:12px; color:var(--accent); opacity:0.9; font-family:inherit; }
+    .footer{ text-align:center; margin-top:14px; font-size:14px; }
+    .footer a{ color:var(--accent); font-weight:700; text-decoration:none; }
+    @media (max-width:480px){ .ring{ --size:260px; } .time{ font-size:54px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="card" role="application" aria-label="Snoopy Pomodoro Timer">
+      <div class="top">
+        <h1>Snoopy Pomodoro</h1>
+        <div class="modes" role="tablist" aria-label="Modos">
+          <button class="mode active" data-min="25" role="tab" aria-selected="true">Foco 25'</button>
+          <button class="mode" data-min="5" role="tab" aria-selected="false">Pausa 5'</button>
+          <button class="mode" data-min="15" role="tab" aria-selected="false">Pausa longa 15'</button>
+        </div>
+      </div>
+
+      <section class="ring" id="ring" aria-live="polite">
+        <div class="time" id="time">25:00</div>
+      </section>
+
+      <div class="controls" role="group" aria-label="Controles">
+        <button class="btn" id="start">Iniciar</button>
+        <button class="btn secondary" id="pause">Pausar</button>
+        <button class="btn secondary" id="reset">Resetar</button>
+      </div>
+
+      <div class="settings">
+        <div class="inputs">
+          <label for="focus">Foco</label>
+          <input id="focus" type="number" min="1" max="180" value="25" />
+          <label for="short">Pausa</label>
+          <input id="short" type="number" min="1" max="60" value="5" />
+          <label for="long">Pausa longa</label>
+          <input id="long" type="number" min="1" max="120" value="15" />
+        </div>
+        <div style="text-align:right;">
+          <div class="small">Auto-start</div>
+          <select id="auto">
+            <option value="off" selected>Off</option>
+            <option value="on">On</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="footer"><a href="https://raynelia.github.io/SnoopyPomodoroTimer/" target="_blank">https://raynelia.github.io/SnoopyPomodoroTimer/</a></p>
+    </main>
+  </div>
+
+  <audio id="ding" preload="auto">
+    <source src="data:audio/wav;base64,UklGRoQCAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABYAZGF0YcABAAAAAACA//////////8AAP///////////wAA/////////wAAAP///////////wAA/////////wAAAP///////////wAA/////////wAAAP///////////wAA" type="audio/wav">
+  </audio>
+
+  <script>
+    (function(){
+      const ring = document.getElementById('ring');
+      const timeEl = document.getElementById('time');
+      const startBtn = document.getElementById('start');
+      const pauseBtn = document.getElementById('pause');
+      const resetBtn = document.getElementById('reset');
+      const modeBtns = Array.from(document.querySelectorAll('.mode'));
+      const inputFocus = document.getElementById('focus');
+      const inputShort = document.getElementById('short');
+      const inputLong = document.getElementById('long');
+      const auto = document.getElementById('auto');
+      const ding = document.getElementById('ding');
+
+      let total = Number(inputFocus.value) * 60;
+      let left = total;
+      let running = false;
+      let raf = null;
+      let last = null;
+      let currentMode = 'focus';
+
+      function pad(n){ return String(n).padStart(2,'0'); }
+      function fmt(s){ return `${pad(Math.floor(s/60))}:${pad(s%60)}`; }
+      function setTotal(minutes){
+        total = Math.max(1, Math.floor(Number(minutes))) * 60;
+        left = total;
+        draw();
+      }
+      function draw(){
+        timeEl.textContent = fmt(left);
+        const pct = ((total - left) / total) * 100;
+        ring.style.setProperty('--p', pct + '%');
+      }
+
+      function tick(ts){
+        if(!last) last = ts;
+        const diff = Math.floor((ts - last) / 1000);
+        if(diff >= 1){
+          last = ts;
+          if(left > 0){
+            left = Math.max(0, left - diff);
+            draw();
+          }
+          if(left === 0){
+            stop();
+            try{ ding.currentTime = 0; ding.play(); }catch(e){}
+            if(auto.value === 'on'){
+              if(currentMode === 'focus'){ activateMode('short'); start(); }
+              else { activateMode('focus'); start(); }
+            }
+          }
+        }
+        if(running) raf = requestAnimationFrame(tick);
+      }
+
+      function start(){
+        if(running) return;
+        running = true;
+        last = null;
+        startBtn.textContent = 'Executando';
+        pauseBtn.textContent = 'Pausar';
+        raf = requestAnimationFrame(tick);
+      }
+      function stop(){
+        running = false;
+        startBtn.textContent = 'Iniciar';
+        pauseBtn.textContent = 'Pausar';
+        if(raf) cancelAnimationFrame(raf);
+        raf = null;
+      }
+      function pause(){
+        if(!running){ start(); return; }
+        running = false;
+        if(raf) cancelAnimationFrame(raf);
+        raf = null;
+        last = null;
+        pauseBtn.textContent = 'Retomar';
+      }
+      function reset(){
+        stop();
+        setModeValues();
+        draw();
+      }
+
+      function setModeValues(){
+        if(currentMode === 'focus') setTotal(inputFocus.value);
+        else if(currentMode === 'short') setTotal(inputShort.value);
+        else setTotal(inputLong.value);
+      }
+
+      function activateMode(mode){
+        currentMode = mode;
+        if(mode === 'focus'){ setTotal(inputFocus.value); }
+        if(mode === 'short'){ setTotal(inputShort.value); }
+        if(mode === 'long'){ setTotal(inputLong.value); }
+        modeBtns.forEach(b=>{
+          const m = Number(b.dataset.min);
+          b.classList.toggle('active', (mode==='focus' && m===Number(inputFocus.value)) || (mode==='short' && m===Number(inputShort.value)) || (mode==='long' && m===Number(inputLong.value)));
+        });
+      }
+
+      modeBtns.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const val = Number(btn.dataset.min);
+          if(val === Number(inputFocus.value)) activateMode('focus');
+          else if(val === Number(inputShort.value)) activateMode('short');
+          else if(val === Number(inputLong.value)) activateMode('long');
+          else {
+            if(val===25) activateMode('focus');
+            if(val===5) activateMode('short');
+            if(val===15) activateMode('long');
+          }
+          stop();
+        });
+      });
+
+      [inputFocus,inputShort,inputLong].forEach(inp=>{
+        inp.addEventListener('change', ()=>{
+          if(currentMode==='focus') setTotal(inputFocus.value);
+          if(currentMode==='short') setTotal(inputShort.value);
+          if(currentMode==='long') setTotal(inputLong.value);
+        });
+      });
+
+      startBtn.addEventListener('click', start);
+      pauseBtn.addEventListener('click', pause);
+      resetBtn.addEventListener('click', reset);
+
+      activateMode('focus');
+      draw();
+    })();
+  </script>
+</body>
+</html>
